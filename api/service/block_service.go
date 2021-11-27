@@ -46,15 +46,15 @@ func (s *BlockService) SupportsNetwork(network string) bool {
 	return false
 }
 
-func (s *BlockService) GetBlockInDesiredFormat(network string, blockResponse client.BlockResponse) DesiredBlockResponseData {
+func (s *BlockService) GetBlockInDesiredFormat(network string, blockResponseData client.BlockResponseData) DesiredBlockResponseData {
 	return DesiredBlockResponseData{
-		Network:           blockResponse.Data.Network,
-		BlockNo:           blockResponse.Data.BlockNo,
-		Time:              time.Unix(blockResponse.Data.Time, 0).Format("01/02/2006 15:04"),
-		PreviousBlockhash: blockResponse.Data.PreviousBlockhash,
-		NextBlockhash:     blockResponse.Data.NextBlockhash,
-		Size:              blockResponse.Data.Size,
-		Txs:               s.parseTransactions(network, blockResponse.Data.Txs),
+		Network:           blockResponseData.Network,
+		BlockNo:           blockResponseData.BlockNo,
+		Time:              time.Unix(blockResponseData.Time, 0).Format("01/02/2006 15:04"),
+		PreviousBlockhash: blockResponseData.PreviousBlockhash,
+		NextBlockhash:     blockResponseData.NextBlockhash,
+		Size:              blockResponseData.Size,
+		Txs:               s.parseTransactions(network, blockResponseData.Txs),
 	}
 }
 

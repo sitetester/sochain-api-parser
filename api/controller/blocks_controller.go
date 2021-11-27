@@ -35,11 +35,12 @@ func (bc *BlocksController) HandleBlockGetRoute(c *gin.Context) {
 
 	blockResponse := bc.blockService.ApiClient.GetBlock(network, blockHashOrNumber)
 	if blockResponse.Status != "success" {
+		// show response with relevant error message returned from remote server
 		c.JSON(http.StatusOK, blockResponse)
 		return
 	}
 
-	c.JSON(http.StatusOK, bc.blockService.GetBlockInDesiredFormat(network, blockResponse))
+	c.JSON(http.StatusOK, bc.blockService.GetBlockInDesiredFormat(network, blockResponse.Data))
 	return
 }
 

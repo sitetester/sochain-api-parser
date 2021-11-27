@@ -25,8 +25,10 @@ type BlockResponseData struct {
 }
 
 const (
+	// StatusSuccess  Indicates API response with `status` = success
 	StatusSuccess = "success"
-	StatusFail    = "fail"
+	// StatusFail Indicates API response with `status` = fail
+	StatusFail = "fail"
 )
 
 type TxResponse struct {

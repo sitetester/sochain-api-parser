@@ -19,6 +19,7 @@ func setupRouter(inTestMode bool) *gin.Engine {
 	apiController := controller.NewApiController()
 
 	route := gin.Default()
+	route.GET("/ping", pong)
 	route.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
 	route.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
 

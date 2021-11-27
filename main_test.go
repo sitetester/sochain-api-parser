@@ -62,7 +62,7 @@ func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	assertions.Equal("fail", blockResponse.Status)
+	assertions.Equal(client.StatusFail, blockResponse.Status)
 }
 
 // https://sochain.com/api/v2/get_block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf

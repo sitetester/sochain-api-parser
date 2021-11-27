@@ -24,6 +24,11 @@ type BlockResponseData struct {
 	Txs               []string `json:"txs"`
 }
 
+const (
+	StatusSuccess = "success"
+	StatusFail    = "fail"
+)
+
 type TxResponse struct {
 	Status          string         `json:"status"`
 	Data            TxResponseData `json:"data"`

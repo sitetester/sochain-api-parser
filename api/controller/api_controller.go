@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sitetester/sochain-api-parser/api/service"
+	"github.com/sitetester/sochain-api-parser/api/service/client"
 	"net/http"
 )
 
@@ -31,7 +32,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 
 	blockResponse := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
 	// may be invalid block number/hash was provided ?
-	if blockResponse.Status != "success" {
+	if blockResponse.Status != client.StatusSuccess {
 		// show response with relevant error message returned from remote server
 		ctx.JSON(http.StatusBadRequest, blockResponse)
 		return
@@ -52,7 +53,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 
 	txResponse := c.apiService.ApiClient.GetTransaction(network, hash)
 	// may be invalid hash was provided ?
-	if txResponse.Status != "success" {
+	if txResponse.Status != client.StatusSuccess {
 		// show response with relevant error message returned from remote server
 		ctx.JSON(http.StatusBadRequest, txResponse)
 		return

@@ -46,7 +46,7 @@ func NewSoChainApiClient() *SoChainApiClient {
 	return &SoChainApiClient{ApiUrl: "https://sochain.com/api/v2"}
 }
 
-// GetBlock https://sochain.com/api/#get-block-hash
+// GetBlock https://sochain.com/api/#get-block
 // https://stackoverflow.com/questions/50676817/does-the-http-request-automatically-retry
 func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) BlockResponse {
 	url := fmt.Sprintf("%s/get_block/%s/%s", c.ApiUrl, network, blockNumberOrHash)

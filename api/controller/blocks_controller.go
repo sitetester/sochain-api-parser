@@ -24,25 +24,25 @@ func NewBlocksController() *BlocksController {
 	}
 }
 
-func (h *BlocksController) HandleBlockGetRoute(c *gin.Context) {
+func (bc *BlocksController) HandleBlockGetRoute(c *gin.Context) {
 	network := c.Param("network")
 	blockHashOrNumber := c.Param("blockHashOrNumber")
 
-	if !h.blockService.SupportsNetwork(network) {
+	if !bc.blockService.SupportsNetwork(network) {
 		c.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
 		return
 	}
 
-	blockResponse := h.blockService.ApiClient.GetBlock(network, blockHashOrNumber)
+	blockResponse := bc.blockService.ApiClient.GetBlock(network, blockHashOrNumber)
 	if blockResponse.Status != "success" {
 		c.JSON(http.StatusOK, blockResponse)
 		return
 	}
 
-	c.JSON(http.StatusOK, h.blockService.GetBlockInDesiredFormat(network, blockResponse))
+	c.JSON(http.StatusOK, bc.blockService.GetBlockInDesiredFormat(network, blockResponse))
 	return
 }
 
-func (h *BlocksController) HandleTransactionRoute(c *gin.Context) {
+func (bc *BlocksController) HandleTransactionRoute(c *gin.Context) {
 
 }

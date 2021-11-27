@@ -15,7 +15,7 @@ func main() {
 
 	route.GET("/ping", pong)
 	route.GET("/block/:network/:blockHashOrNumber", blocksController.HandleBlockGetRoute)
-	// route.GET("/block/:network/:blockHashOrNumber", blocksController.HandleBlockRoute)
+	route.GET("/block/:network/:hash", blocksController.HandleTransactionGetRoute)
 
 	err := route.Run(":3000")
 	if err != nil {

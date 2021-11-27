@@ -24,26 +24,44 @@ func NewBlocksController() *BlocksController {
 	}
 }
 
-func (bc *BlocksController) HandleBlockGetRoute(c *gin.Context) {
-	network := c.Param("network")
-	blockHashOrNumber := c.Param("blockHashOrNumber")
+func (c *BlocksController) HandleBlockGetRoute(ctx *gin.Context) {
+	network := ctx.Param("network")
+	blockHashOrNumber := ctx.Param("blockHashOrNumber")
 
-	if !bc.blockService.SupportsNetwork(network) {
-		c.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
+	if !c.blockService.SupportsNetwork(network) {
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
 		return
 	}
 
-	blockResponse := bc.blockService.ApiClient.GetBlock(network, blockHashOrNumber)
+	blockResponse := c.blockService.ApiClient.GetBlock(network, blockHashOrNumber)
+	// may be invalid block number/hash was provided ?
 	if blockResponse.Status != "success" {
 		// show response with relevant error message returned from remote server
-		c.JSON(http.StatusOK, blockResponse)
+		ctx.JSON(http.StatusBadRequest, blockResponse)
 		return
 	}
 
-	c.JSON(http.StatusOK, bc.blockService.GetBlockInDesiredFormat(network, blockResponse.Data))
+	ctx.JSON(http.StatusOK, c.blockService.GetBlockInDesiredFormat(network, blockResponse.Data))
 	return
 }
 
-func (bc *BlocksController) HandleTransactionRoute(c *gin.Context) {
+func (c *BlocksController) HandleTransactionGetRoute(ctx *gin.Context) {
+	network := ctx.Param("network")
+	hash := ctx.Param("hash")
 
+	if !c.blockService.SupportsNetwork(network) {
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
+		return
+	}
+
+	txResponse := c.blockService.ApiClient.GetTransaction(network, hash)
+	// may be invalid hash was provided ?
+	if txResponse.Status != "success" {
+		// show response with relevant error message returned from remote server
+		ctx.JSON(http.StatusBadRequest, txResponse)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, c.blockService.GetTransactionInDesiredFormat(txResponse.Data))
+	return
 }

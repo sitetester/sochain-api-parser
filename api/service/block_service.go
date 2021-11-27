@@ -81,14 +81,7 @@ forLoop:
 		select {
 		case txResponse := <-txResponseChan:
 			count += 1
-
-			data := txResponse.Data
-			desiredTxResponseData = append(desiredTxResponseData, DesiredTxResponseData{
-				Txid:      data.Txid,
-				Time:      s.timeInt64ToString(data.Time),
-				Fee:       data.Fee,
-				SentValue: data.SentValue,
-			})
+			desiredTxResponseData = append(desiredTxResponseData, s.GetTransactionInDesiredFormat(txResponse.Data))
 			if count == s.maxTxs {
 				break forLoop
 			}
@@ -98,7 +91,12 @@ forLoop:
 	return desiredTxResponseData
 }
 
-// https://yourbasic.org/golang/format-parse-string-time-date-example/
-func (s BlockService) timeInt64ToString(blockTime int64) string {
-	return time.Unix(blockTime, 0).Format("01/02/2006 15:04")
+// GetTransactionInDesiredFormat https://yourbasic.org/golang/format-parse-string-time-date-example/
+func (s *BlockService) GetTransactionInDesiredFormat(txResponseData client.TxResponseData) DesiredTxResponseData {
+	return DesiredTxResponseData{
+		Txid:      txResponseData.Txid,
+		Time:      time.Unix(txResponseData.Time, 0).Format("01/02/2006 15:04"),
+		Fee:       txResponseData.Fee,
+		SentValue: txResponseData.SentValue,
+	}
 }

@@ -21,12 +21,17 @@ func NewApiController() *ApiController {
 	}
 }
 
+const (
+	ErrUnsupportedNetwork   = "Unsupported network."
+	ErrInvalidInputProvided = "Invalid input provided"
+)
+
 func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	blockHashOrNumber := ctx.Param("blockHashOrNumber")
 
 	if !c.apiService.SupportsNetwork(network) {
-		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
 
@@ -34,7 +39,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	// may be invalid block number/hash was provided ?
 	if blockResponse.Status != client.StatusSuccess {
 		// show response with relevant error message returned from remote server
-		ctx.JSON(http.StatusBadRequest, blockResponse)
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
 		return
 	}
 
@@ -47,7 +52,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	hash := ctx.Param("hash")
 
 	if !c.apiService.SupportsNetwork(network) {
-		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: "Unsupported network."})
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
 
@@ -55,7 +60,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	// may be invalid hash was provided ?
 	if txResponse.Status != client.StatusSuccess {
 		// show response with relevant error message returned from remote server
-		ctx.JSON(http.StatusBadRequest, txResponse)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
 		return
 	}
 

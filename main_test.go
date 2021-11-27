@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/sitetester/sochain-api-parser/api/controller"
 	"github.com/sitetester/sochain-api-parser/api/service"
-	"github.com/sitetester/sochain-api-parser/api/service/client"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -35,19 +34,20 @@ func launchRequest(t *testing.T, url string) *httptest.ResponseRecorder {
 	return w
 }
 
+func parseErrorResponse(r *httptest.ResponseRecorder) controller.ErrorResponse {
+	var er controller.ErrorResponse
+	json.NewDecoder(r.Body).Decode(&er)
+	return er
+}
+
 func TestHandleBlockGetRouteWithInvalidNetwork(t *testing.T) {
 	assertions := assert.New(t)
 
 	w := launchRequest(t, "/block/BTC123/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf")
 	checkStatusCode(t, 400, w.Code)
 
-	var errorResponse controller.ErrorResponse
-	err := json.NewDecoder(w.Body).Decode(&errorResponse)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	assertions.Equal("Unsupported network.", errorResponse.Error)
+	errorResponse := parseErrorResponse(w)
+	assertions.Equal(controller.ErrUnsupportedNetwork, errorResponse.Error)
 }
 
 func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
@@ -56,13 +56,8 @@ func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
 	w := launchRequest(t, "/block/BTC/abcd")
 	checkStatusCode(t, 400, w.Code)
 
-	var blockResponse client.BlockResponse
-	err := json.NewDecoder(w.Body).Decode(&blockResponse)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	assertions.Equal(client.StatusFail, blockResponse.Status)
+	errorResponse := parseErrorResponse(w)
+	assertions.Equal(controller.ErrInvalidInputProvided, errorResponse.Error)
 }
 
 // https://sochain.com/api/v2/get_block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf
@@ -106,4 +101,24 @@ func checkTransaction(t *testing.T, desiredTxResponseData service.DesiredTxRespo
 	assertions.Equal(timeStr, desiredTxResponseData.Time)
 	assertions.Equal(fee, desiredTxResponseData.Fee)
 	assertions.Equal(sentValue, desiredTxResponseData.SentValue)
+}
+
+// https://sochain.com/api/v2/tx/BTC/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f
+func TestHandleTransactionGetRouteWithInvalidValidNetwork(t *testing.T) {
+	assertions := assert.New(t)
+
+	w := launchRequest(t, "/tx/BTC123/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f")
+	checkStatusCode(t, 400, w.Code)
+
+	errorResponse := parseErrorResponse(w)
+	assertions.Equal(controller.ErrUnsupportedNetwork, errorResponse.Error)
+}
+
+func TestHandleTransactionGetRouteWithInvalidValidHash(t *testing.T) {
+	assertions := assert.New(t)
+	w := launchRequest(t, "/tx/BTC/xyz")
+	checkStatusCode(t, 400, w.Code)
+
+	errorResponse := parseErrorResponse(w)
+	assertions.Equal(controller.ErrInvalidInputProvided, errorResponse.Error)
 }

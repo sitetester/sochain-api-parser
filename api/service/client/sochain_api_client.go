@@ -65,6 +65,10 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) Bl
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return BlockResponse{Status: StatusFail}
+	}
+
 	var blockResponse BlockResponse
 	if err := json.Unmarshal(body, &blockResponse); err != nil {
 		panic(err)
@@ -83,6 +87,10 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) TxRespons
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return TxResponse{Status: StatusFail}
+	}
+
 	var txResponse TxResponse
 	if err := json.Unmarshal(body, &txResponse); err != nil {
 		panic(err)

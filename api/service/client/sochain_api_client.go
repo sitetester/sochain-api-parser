@@ -17,16 +17,17 @@ type BlockResponseData struct {
 	Blockhash         string   `json:"blockhash"`
 	BlockNo           int      `json:"block_no"`
 	Blockid           string   `json:"blockid"` // this field is needed in case of "status": "fail" response
-	Time              int64    `json:"time"`    // actual type is `int`, but we need to display this time in string format in API response
+	Time              int64    `json:"time"`    // int64 is needed for conversion to string
 	PreviousBlockhash string   `json:"previous_blockhash"`
 	NextBlockhash     string   `json:"next_blockhash"`
-	Size              int64    `json:"size"`
+	Size              int      `json:"size"`
 	Txs               []string `json:"txs"`
 }
 
 type TxResponse struct {
-	Status string         `json:"status"`
-	Data   TxResponseData `json:"data"`
+	Status          string         `json:"status"`
+	Data            TxResponseData `json:"data"`
+	CustomSortOrder int            `json:"-"` // this will be used for sorting transactions
 }
 
 type TxResponseData struct {

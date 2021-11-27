@@ -9,14 +9,24 @@ func pong(c *gin.Context) {
 	c.String(200, "pong")
 }
 
-func main() {
-	blocksController := controller.NewBlocksController()
+func setupRouter(inTestMode bool) *gin.Engine {
+
+	if inTestMode {
+		// switch to test mode (to avoid debug output)
+		gin.SetMode(gin.TestMode)
+	}
+
+	apiController := controller.NewApiController()
+
 	route := gin.Default()
+	route.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
+	route.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
 
-	route.GET("/ping", pong)
-	route.GET("/block/:network/:blockHashOrNumber", blocksController.HandleBlockGetRoute)
-	route.GET("/block/:network/:hash", blocksController.HandleTransactionGetRoute)
+	return route
+}
 
+func main() {
+	route := setupRouter(false)
 	err := route.Run(":3000")
 	if err != nil {
 		panic(err)

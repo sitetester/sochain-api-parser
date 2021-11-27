@@ -65,6 +65,7 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) Bl
 	return blockResponse
 }
 
+// GetTransaction https://sochain.com/api/#get-tx
 func (c *SoChainApiClient) GetTransaction(network string, hash string) TxResponse {
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
 	resp, err := http.Get(url)

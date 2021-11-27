@@ -66,6 +66,7 @@ func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
 }
 
 // https://sochain.com/api/v2/get_block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf
+// https://www.epochconverter.com
 func TestHandleBlockGetRouteWithValidNetworkAndBlocNum(t *testing.T) {
 	assertions := assert.New(t)
 
@@ -88,4 +89,21 @@ func TestHandleBlockGetRouteWithValidNetworkAndBlocNum(t *testing.T) {
 
 	// let's check some transactions
 
+	// first transaction
+	// https://sochain.com/api/v2/tx/BTC/dbaf14e1c476e76ea05a8b71921a46d6b06f0a950f17c5f9f1a03b8fae467f10
+	txId := "dbaf14e1c476e76ea05a8b71921a46d6b06f0a950f17c5f9f1a03b8fae467f10"
+	checkTransaction(t, desiredBlockResponseData.Txs[0], txId, "09/22/2012 13:45", "0.0", "50.63517500")
+
+	// last transaction
+	// https://sochain.com/api/v2/tx/BTC/80efe43cf64a524d1417546a027786127ad87475f3af1c13b8f3719cd4268679
+	txId = "80efe43cf64a524d1417546a027786127ad87475f3af1c13b8f3719cd4268679"
+	checkTransaction(t, desiredBlockResponseData.Txs[9], txId, "09/22/2012 13:45", "0.0", "50.00000000")
+}
+
+func checkTransaction(t *testing.T, desiredTxResponseData service.DesiredTxResponseData, txId string, timeStr string, fee string, sentValue string) {
+	assertions := assert.New(t)
+	assertions.Equal(txId, desiredTxResponseData.Txid)
+	assertions.Equal(timeStr, desiredTxResponseData.Time)
+	assertions.Equal(fee, desiredTxResponseData.Fee)
+	assertions.Equal(sentValue, desiredTxResponseData.SentValue)
 }

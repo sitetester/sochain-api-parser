@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/controller"
+	"github.com/sitetester/sochain-api-parser/middleware"
 	"log"
 	"os"
 )
@@ -18,12 +19,12 @@ func setupRouter(inTestMode bool) *gin.Engine {
 
 	apiController := controller.NewApiController()
 
-	route := gin.Default()
-	route.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
-	route.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
-	route.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
+	engine := gin.Default()
+	engine.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
+	engine.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
+	engine.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
 
-	return route
+	return engine
 }
 
 // return the value of the key
@@ -37,14 +38,15 @@ func goDotEnvVariable(key string) string {
 }
 
 func main() {
-	route := setupRouter(false)
+	engine := setupRouter(false)
+	engine.Use(middleware.LoggerToFile())
 
 	addr := "8081"
 	addrEnv := goDotEnvVariable("HTTP_PORT") // create `.env` file with example value (HTTP_PORT=8182)
 	if addrEnv != "" {
 		addr = addrEnv
 	}
-	err := route.Run(fmt.Sprintf(":%s", addr))
+	err := engine.Run(fmt.Sprintf(":%s", addr))
 	if err != nil {
 		panic(err)
 	}

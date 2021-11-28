@@ -3,12 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sitetester/sochain-api-parser/controller"
-	"log"
 )
-
-func pong(c *gin.Context) {
-	c.String(200, "pong")
-}
 
 func setupRouter(inTestMode bool) *gin.Engine {
 
@@ -20,7 +15,7 @@ func setupRouter(inTestMode bool) *gin.Engine {
 	apiController := controller.NewApiController()
 
 	route := gin.Default()
-	route.GET("/ping", pong)
+	route.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
 	route.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
 	route.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
 
@@ -33,6 +28,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println("Server is now running!")
 }

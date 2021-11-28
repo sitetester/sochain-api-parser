@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/controller"
-	"github.com/sitetester/sochain-api-parser/middleware"
+	"io"
 	"log"
 	"os"
 )
@@ -17,9 +17,16 @@ func setupRouter(inTestMode bool) *gin.Engine {
 		gin.SetMode(gin.TestMode)
 	}
 
-	apiController := controller.NewApiController()
+	gin.SetMode(gin.ReleaseMode)
+	// disable Console Color, you don't need console color when writing the logs to file.
+	gin.DisableConsoleColor()
+	f, _ := os.Create("logs/gin.log")
+	gin.DefaultWriter = io.MultiWriter(f)
 
 	engine := gin.Default()
+	engine.Use(gin.Recovery())
+
+	apiController := controller.NewApiController()
 	engine.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
 	engine.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
 	engine.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
@@ -39,7 +46,6 @@ func goDotEnvVariable(key string) string {
 
 func main() {
 	engine := setupRouter(false)
-	engine.Use(middleware.LoggerToFile())
 
 	addr := "8081"
 	addrEnv := goDotEnvVariable("HTTP_PORT") // create `.env` file with example value (HTTP_PORT=8182)

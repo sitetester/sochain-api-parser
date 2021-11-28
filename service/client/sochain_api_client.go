@@ -7,8 +7,15 @@ import (
 	"net/http"
 )
 
+type RemoteApiStatus string
+
+const (
+	StatusSuccess RemoteApiStatus = "success"
+	StatusFail    RemoteApiStatus = "fail"
+)
+
 type BlockResponse struct {
-	Status string            `json:"status"`
+	Status RemoteApiStatus   `json:"status"`
 	Data   BlockResponseData `json:"data"`
 }
 
@@ -24,17 +31,10 @@ type BlockResponseData struct {
 	Txs               []string `json:"txs"`
 }
 
-const (
-	// StatusSuccess  Indicates API response with `status` = success
-	StatusSuccess = "success"
-	// StatusFail Indicates API response with `status` = fail
-	StatusFail = "fail"
-)
-
 type TxResponse struct {
-	Status          string         `json:"status"`
-	Data            TxResponseData `json:"data"`
-	CustomSortOrder int            `json:"-"` // this will be used for sorting transactions
+	Status          RemoteApiStatus `json:"status"`
+	Data            TxResponseData  `json:"data"`
+	CustomSortOrder int             `json:"-"` // this will be used for sorting transactions
 }
 
 type TxResponseData struct {

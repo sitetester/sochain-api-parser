@@ -18,7 +18,6 @@ func LoggerToFile() gin.HandlerFunc {
 
 	// log file
 	fileName := path.Join(logFilePath, logFileName)
-	println("fileName: ", fileName)
 
 	// write file
 	src, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)

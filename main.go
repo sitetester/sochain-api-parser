@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/controller"
+	"log"
+	"os"
 )
 
 func setupRouter(inTestMode bool) *gin.Engine {
@@ -22,9 +26,25 @@ func setupRouter(inTestMode bool) *gin.Engine {
 	return route
 }
 
+// return the value of the key
+func goDotEnvVariable(key string) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return os.Getenv(key)
+}
+
 func main() {
 	route := setupRouter(false)
-	err := route.Run(":8081")
+
+	addr := "8081"
+	addrEnv := goDotEnvVariable("HTTP_PORT") // create `.env` file with example value (HTTP_PORT=8182)
+	if addrEnv != "" {
+		addr = addrEnv
+	}
+	err := route.Run(fmt.Sprintf(":%s", addr))
 	if err != nil {
 		panic(err)
 	}

@@ -14,13 +14,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the source from the current directory to the Working Directory inside the container
-COPY *.go ./
+COPY . ./
 
 # Build the Go app
-RUN go build -o sochain-api-parser
+RUN go build -o sochain-api-parser .
 
 # Expose port 8080 to the outside world
-EXPOSE 8080
+EXPOSE 8081
+
+RUN chmod +x ./sochain-api-parser
 
 # Run the executable
-CMD [ "/sochain-api-parser" ]
+CMD [ "./sochain-api-parser" ]

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sitetester/sochain-api-parser/controller"
+	"log"
 )
 
 func pong(c *gin.Context) {
@@ -32,4 +33,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Println("Server is now running!")
 }

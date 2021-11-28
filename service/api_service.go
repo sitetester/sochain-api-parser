@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/sitetester/sochain-api-parser/api/service/client"
+	"github.com/sitetester/sochain-api-parser/service/client"
 	"sort"
 	"time"
 )

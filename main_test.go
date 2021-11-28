@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/sitetester/sochain-api-parser/api/controller"
-	"github.com/sitetester/sochain-api-parser/api/service"
+	"github.com/sitetester/sochain-api-parser/controller"
+	"github.com/sitetester/sochain-api-parser/service"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"

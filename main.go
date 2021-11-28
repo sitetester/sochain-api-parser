@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sitetester/sochain-api-parser/api/controller"
+	"github.com/sitetester/sochain-api-parser/controller"
 )
 
 func pong(c *gin.Context) {
@@ -28,7 +28,7 @@ func setupRouter(inTestMode bool) *gin.Engine {
 
 func main() {
 	route := setupRouter(false)
-	err := route.Run(":3000")
+	err := route.Run(":8081")
 	if err != nil {
 		panic(err)
 	}

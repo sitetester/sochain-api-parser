@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sitetester/sochain-api-parser/api/service"
-	"github.com/sitetester/sochain-api-parser/api/service/client"
+	"github.com/sitetester/sochain-api-parser/service"
+	"github.com/sitetester/sochain-api-parser/service/client"
 	"net/http"
 )
 

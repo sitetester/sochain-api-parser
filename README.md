@@ -1,1 +1,1 @@
-# sochain-api-parser
+`docker-compose up`  

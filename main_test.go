@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/sitetester/sochain-api-parser/controller"
 	"github.com/sitetester/sochain-api-parser/service"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func checkStatusCode(t *testing.T, expected int, actual int) {
 }
 
 func launchRequest(t *testing.T, url string) *httptest.ResponseRecorder {
-	r := setupRouter(true)
+	r := setupRouter(gin.TestMode) // switch to test mode (to avoid debug output)
 
 	// create a response recorder so you can inspect the response
 	w := httptest.NewRecorder()

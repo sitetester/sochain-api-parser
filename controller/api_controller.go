@@ -2,6 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service"
 	"github.com/sitetester/sochain-api-parser/service/client"
 	"net/http"
@@ -38,6 +40,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	blockResponse := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
 	// may be invalid block number/hash was provided ?
 	if blockResponse.Status != client.StatusSuccess {
+		logger.GetLogger().WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).Debug("bad request!")
 		// show response with relevant error message returned from remote server
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
 		return
@@ -59,6 +62,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	txResponse := c.apiService.ApiClient.GetTransaction(network, hash)
 	// may be invalid hash was provided ?
 	if txResponse.Status != client.StatusSuccess {
+		logger.GetLogger().WithFields(logrus.Fields{"network": network, "hash": hash}).Debug("bad request!")
 		// show response with relevant error message returned from remote server
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
 		return

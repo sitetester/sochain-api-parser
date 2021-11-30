@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type RemoteApiStatus string
@@ -46,27 +47,33 @@ type TxResponseData struct {
 }
 
 type SoChainApiClient struct {
-	ApiUrl string
+	ApiUrl  string
+	timeout time.Duration
 }
 
 // NewSoChainApiClient - Golang constructor ;)
 func NewSoChainApiClient() *SoChainApiClient {
-	return &SoChainApiClient{ApiUrl: "https://sochain.com/api/v2"}
+	return &SoChainApiClient{ApiUrl: "https://sochain.com/api/v2", timeout: 5 * time.Second}
 }
 
 // GetBlock https://sochain.com/api/#get-block
 // https://stackoverflow.com/questions/50676817/does-the-http-request-automatically-retry
 func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) BlockResponse {
 	url := fmt.Sprintf("%s/get_block/%s/%s", c.ApiUrl, network, blockNumberOrHash)
-	resp, err := http.Get(url)
+	client := &http.Client{Timeout: c.timeout}
+	resp, err := client.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
 		return BlockResponse{Status: StatusFail}
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
 	}
 
 	var blockResponse BlockResponse
@@ -80,15 +87,20 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) Bl
 // GetTransaction https://sochain.com/api/#get-tx
 func (c *SoChainApiClient) GetTransaction(network string, hash string) TxResponse {
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
-	resp, err := http.Get(url)
+	client := &http.Client{Timeout: c.timeout}
+	resp, err := client.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
 		return TxResponse{Status: StatusFail}
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
 	}
 
 	var txResponse TxResponse

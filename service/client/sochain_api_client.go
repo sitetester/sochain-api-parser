@@ -4,29 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
 
 type RemoteApiStatus string
 
-const (
-	StatusSuccess RemoteApiStatus = "success"
-	StatusFail    RemoteApiStatus = "fail"
-)
-
 type BlockResponse struct {
-	Status RemoteApiStatus   `json:"status"`
-	Data   BlockResponseData `json:"data"`
+	StatusCode int               `json:"-"`
+	Status     RemoteApiStatus   `json:"status"`
+	Data       BlockResponseData `json:"data"`
 }
 
 type BlockResponseData struct {
 	Network           string   `json:"network"`
+	Blockid           string   `json:"blockid"` // this field is needed in case of "status": "fail" response
 	Blockhash         string   `json:"blockhash"`
 	BlockNo           int      `json:"block_no"`
-	Blockid           string   `json:"blockid"` // this field is needed in case of "status": "fail" response
-	Time              int64    `json:"time"`    // int64 is needed for conversion to string
+	Time              int64    `json:"time"` // int64 is needed for conversion to string
 	PreviousBlockhash string   `json:"previous_blockhash"`
 	NextBlockhash     string   `json:"next_blockhash"`
 	Size              int      `json:"size"`
@@ -34,6 +29,7 @@ type BlockResponseData struct {
 }
 
 type TxResponse struct {
+	StatusCode      int             `json:"-"`
 	Status          RemoteApiStatus `json:"status"`
 	Data            TxResponseData  `json:"data"`
 	CustomSortOrder int             `json:"-"` // this will be used for sorting transactions
@@ -59,55 +55,58 @@ func NewSoChainApiClient() *SoChainApiClient {
 
 // GetBlock https://sochain.com/api/#get-block
 // https://stackoverflow.com/questions/50676817/does-the-http-request-automatically-retry
-func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) BlockResponse {
+func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (BlockResponse, error) {
 	url := fmt.Sprintf("%s/get_block/%s/%s", c.ApiUrl, network, blockNumberOrHash)
-	client := &http.Client{Timeout: c.timeout}
-	resp, err := client.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return BlockResponse{Status: StatusFail}
+	bytes, code, err := c.performRequest(url)
+	if err != nil { // e.g. remote API is temporarily down
+		return BlockResponse{}, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
+	if code == http.StatusOK {
+		var blockResponse BlockResponse
+		if err := json.Unmarshal(bytes, &blockResponse); err != nil {
+			return BlockResponse{}, err
+		}
+		blockResponse.StatusCode = code
+		return blockResponse, nil
 	}
 
-	var blockResponse BlockResponse
-	if err := json.Unmarshal(body, &blockResponse); err != nil {
-		log.Fatal(err)
-	}
-
-	return blockResponse
+	// some other 5xx code ?
+	return BlockResponse{StatusCode: code}, nil
 }
 
 // GetTransaction https://sochain.com/api/#get-tx
-func (c *SoChainApiClient) GetTransaction(network string, hash string) TxResponse {
+func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxResponse, error) {
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
+	bytes, code, err := c.performRequest(url)
+	if err != nil { // e.g. remote API is temporarily down
+		return TxResponse{}, err
+	}
+
+	if code == http.StatusOK {
+		var txResponse TxResponse
+		if err := json.Unmarshal(bytes, &txResponse); err != nil {
+			return TxResponse{}, err
+		}
+		txResponse.StatusCode = code
+		return txResponse, nil
+	}
+
+	// some other 5xx code ?
+	return TxResponse{StatusCode: code}, nil
+}
+
+func (c *SoChainApiClient) performRequest(url string) ([]byte, int, error) {
 	client := &http.Client{Timeout: c.timeout}
 	resp, err := client.Get(url)
-	if err != nil {
-		log.Fatal(err)
+	if err != nil { // e.g. remote API is temporarily down
+		return []byte(""), 0, err
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return TxResponse{Status: StatusFail}
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return []byte(""), 0, err
 	}
 
-	var txResponse TxResponse
-	if err := json.Unmarshal(body, &txResponse); err != nil {
-		log.Fatal(err)
-	}
-
-	return txResponse
+	return body, resp.StatusCode, nil
 }

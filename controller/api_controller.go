@@ -7,7 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service"
-	"github.com/sitetester/sochain-api-parser/service/client"
 	"net/http"
 )
 
@@ -28,8 +27,9 @@ func NewApiController(cache *cache.Cache) *ApiController {
 }
 
 const (
-	ErrUnsupportedNetwork   = "Unsupported network."
-	ErrInvalidInputProvided = "Invalid input provided"
+	ErrUnsupportedNetwork = "Unsupported network."
+	ErrNotFound           = "Not found."
+	ErrSomethingWentWrong = "Something went wrong in calling external API, try again"
 )
 
 // HandleBlockGetRoute https://github.com/patrickmn/go-cache#usage
@@ -49,24 +49,30 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	blockResponse := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
-	// may be invalid block number/hash was provided ?
-	if blockResponse.Status != client.StatusSuccess {
-		logger.GetLogger().
-			WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).
-			Debug("bad request!")
-
-		// show response with relevant error message returned from remote server
-		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
+	blockResponse, err := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
+	if err != nil {
+		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
+		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	// put in cache
-	desiredBlockResponseData := c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data)
-	c.cache.Set(cacheKey, &desiredBlockResponseData, cache.DefaultExpiration)
-
-	ctx.JSON(http.StatusOK, desiredBlockResponseData)
-	return
+	switch blockResponse.StatusCode {
+	case http.StatusNotFound:
+		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
+		return
+	case http.StatusOK:
+		desiredBlockResponseData := c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data)
+		// put in cache
+		c.cache.Set(cacheKey, &desiredBlockResponseData, cache.DefaultExpiration)
+		ctx.JSON(http.StatusOK, desiredBlockResponseData)
+		return
+	default:
+		logger.GetLogger().
+			WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).
+			Debug("Unexpected API response code: ", blockResponse.StatusCode)
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
+		return
+	}
 }
 
 func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
@@ -85,19 +91,28 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	txResponse := c.apiService.ApiClient.GetTransaction(network, hash)
-	// may be invalid hash was provided ?
-	if txResponse.Status != client.StatusSuccess {
-		logger.GetLogger().WithFields(logrus.Fields{"network": network, "hash": hash}).Debug("bad request!")
-		// show response with relevant error message returned from remote server
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
+	txResponse, err := c.apiService.ApiClient.GetTransaction(network, hash)
+	if err != nil {
+		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
+		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	// put in cache
-	desiredTxResponseData := c.apiService.GetTransactionInDesiredFormat(txResponse.Data)
-	c.cache.Set(cacheKey, &desiredTxResponseData, cache.DefaultExpiration)
-
-	ctx.JSON(http.StatusOK, desiredTxResponseData)
-	return
+	switch txResponse.StatusCode {
+	case http.StatusNotFound:
+		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
+		return
+	case http.StatusOK:
+		desiredTxResponseData := c.apiService.GetTransactionInDesiredFormat(txResponse.Data)
+		// put in cache
+		c.cache.Set(cacheKey, &desiredTxResponseData, cache.DefaultExpiration)
+		ctx.JSON(http.StatusOK, desiredTxResponseData)
+		return
+	default:
+		logger.GetLogger().
+			WithFields(logrus.Fields{"network": network, "hash": hash}).
+			Debug("Unexpected API response code: ", txResponse.StatusCode)
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
+		return
+	}
 }

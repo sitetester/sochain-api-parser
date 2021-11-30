@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service/client"
 	"sort"
 	"time"
@@ -61,28 +62,37 @@ func (s *ApiService) GetBlockInDesiredFormat(network string, blockResponseData c
 	}
 }
 
+func (s *ApiService) parseConcurrently(network string, index int, hash string, txResponseChan chan client.TxResponse) {
+	tx, err := s.ApiClient.GetTransaction(network, hash)
+	if err != nil {
+		logger.GetLogger().Errorf("Error while retreiving tx: %s", err.Error())
+	}
+	// attach a custom sort order, since goroutines are launched in random order
+	tx.CustomSortOrder = index
+	txResponseChan <- tx
+}
+
 func (s *ApiService) parseTransactions(network string, blockHashes []string) []DesiredTxResponseData {
 	var txResponses []client.TxResponse
 	var desiredTxResponseData []DesiredTxResponseData
 
-	hashes := blockHashes[:s.maxTxs] // [10] = 0-9
-	if len(hashes) == 0 {
+	if len(blockHashes) == 0 {
 		return desiredTxResponseData
 	}
 
-	txResponseChan := make(chan client.TxResponse, s.maxTxs)
+	var hashes []string
+	if len(blockHashes) >= s.maxTxs {
+		hashes = blockHashes[:s.maxTxs] // [10] = 0-9
+	} else {
+		hashes = blockHashes[:]
+	}
+
+	txResponseChan := make(chan client.TxResponse, len(hashes))
 
 	// let's parse them concurrently
 	parseTxs := func() {
 		for index, hash := range hashes {
-			go func(index int, hash string, txResponseChan chan client.TxResponse) {
-				tx := s.ApiClient.GetTransaction(network, hash)
-				// attach a custom sort order, since goroutines are launched in random order
-				tx.CustomSortOrder = index
-
-				txResponseChan <- tx
-
-			}(index, hash, txResponseChan)
+			go s.parseConcurrently(network, index, hash, txResponseChan)
 		}
 	}
 
@@ -94,9 +104,8 @@ func (s *ApiService) parseTransactions(network string, blockHashes []string) []D
 			select {
 			case txResponse := <-txResponseChan:
 				count += 1
-				// txResponses = append(txResponses, s.GetTransactionInDesiredFormat(txResponse.Data))
 				txResponses = append(txResponses, txResponse)
-				if count == s.maxTxs {
+				if count == len(hashes) {
 					break forLoop
 				}
 			}

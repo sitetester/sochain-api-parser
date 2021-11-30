@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/patrickmn/go-cache"
 	"github.com/sitetester/sochain-api-parser/controller"
 	"github.com/sitetester/sochain-api-parser/logger"
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 func setupRouter(value string) *gin.Engine {
@@ -23,7 +25,10 @@ func setupRouter(value string) *gin.Engine {
 		engine.Use(gin.Recovery())
 	}
 
-	apiController := controller.NewApiController()
+	// https://github.com/patrickmn/go-cache
+	cache := cache.New(60*time.Minute, 10*time.Minute)
+
+	apiController := controller.NewApiController(cache)
 	engine.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
 	engine.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
 	engine.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)

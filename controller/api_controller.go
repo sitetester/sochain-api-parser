@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service"
@@ -15,11 +17,13 @@ type ErrorResponse struct {
 
 type ApiController struct {
 	apiService *service.ApiService
+	cache      *cache.Cache
 }
 
-func NewApiController() *ApiController {
+func NewApiController(cache *cache.Cache) *ApiController {
 	return &ApiController{
 		apiService: service.NewApiService(10),
+		cache:      cache,
 	}
 }
 
@@ -28,6 +32,7 @@ const (
 	ErrInvalidInputProvided = "Invalid input provided"
 )
 
+// HandleBlockGetRoute https://github.com/patrickmn/go-cache#usage
 func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	blockHashOrNumber := ctx.Param("blockHashOrNumber")
@@ -37,16 +42,30 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		return
 	}
 
+	// try to retrieve from cache (if not expired)
+	cacheKey := fmt.Sprintf("%s_%s", network, blockHashOrNumber)
+	if x, found := c.cache.Get(cacheKey); found {
+		ctx.IndentedJSON(http.StatusOK, x.(*service.DesiredBlockResponseData))
+		return
+	}
+
 	blockResponse := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
 	// may be invalid block number/hash was provided ?
 	if blockResponse.Status != client.StatusSuccess {
-		logger.GetLogger().WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).Debug("bad request!")
+		logger.GetLogger().
+			WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).
+			Debug("bad request!")
+
 		// show response with relevant error message returned from remote server
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrInvalidInputProvided})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data))
+	// put in cache
+	desiredBlockResponseData := c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data)
+	c.cache.Set(cacheKey, &desiredBlockResponseData, cache.DefaultExpiration)
+
+	ctx.JSON(http.StatusOK, desiredBlockResponseData)
 	return
 }
 
@@ -59,6 +78,13 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
+	// try to retrieve from cache (if not expired)
+	cacheKey := fmt.Sprintf("%s_%s", network, hash)
+	if x, found := c.cache.Get(cacheKey); found {
+		ctx.IndentedJSON(http.StatusOK, x.(*service.DesiredTxResponseData))
+		return
+	}
+
 	txResponse := c.apiService.ApiClient.GetTransaction(network, hash)
 	// may be invalid hash was provided ?
 	if txResponse.Status != client.StatusSuccess {
@@ -68,6 +94,10 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, c.apiService.GetTransactionInDesiredFormat(txResponse.Data))
+	// put in cache
+	desiredTxResponseData := c.apiService.GetTransactionInDesiredFormat(txResponse.Data)
+	c.cache.Set(cacheKey, &desiredTxResponseData, cache.DefaultExpiration)
+
+	ctx.JSON(http.StatusOK, desiredTxResponseData)
 	return
 }

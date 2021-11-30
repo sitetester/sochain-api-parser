@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 )
@@ -63,7 +64,7 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) Bl
 	client := &http.Client{Timeout: c.timeout}
 	resp, err := client.Get(url)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 
@@ -73,12 +74,12 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) Bl
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	var blockResponse BlockResponse
 	if err := json.Unmarshal(body, &blockResponse); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return blockResponse
@@ -90,7 +91,7 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) TxRespons
 	client := &http.Client{Timeout: c.timeout}
 	resp, err := client.Get(url)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 
@@ -100,12 +101,12 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) TxRespons
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	var txResponse TxResponse
 	if err := json.Unmarshal(body, &txResponse); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return txResponse

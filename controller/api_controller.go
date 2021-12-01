@@ -8,6 +8,7 @@ import (
 	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service"
 	"net/http"
+	"strconv"
 )
 
 type ErrorResponse struct {
@@ -66,7 +67,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, desiredBlockResponseData)
 		return
 	default:
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
+		ctx.JSON(blockResponse.StatusCode, c.statusCodeToMsg(blockResponse.StatusCode))
 		return
 	}
 }
@@ -111,4 +112,15 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
 		return
 	}
+}
+
+func (c ApiController) statusCodeToMsg(statusCode int) string {
+	var msg string
+	code := strconv.Itoa(statusCode)
+	if code[0:1] == "4" {
+		msg = "Bad Request."
+	} else {
+		msg = "Unexpected Response."
+	}
+	return msg
 }

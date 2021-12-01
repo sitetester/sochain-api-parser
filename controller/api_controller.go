@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
-	"github.com/sirupsen/logrus"
-	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service"
 	"net/http"
 	"strconv"
@@ -90,7 +88,6 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 
 	txResponse, err := c.apiService.ApiClient.GetTransaction(network, hash)
 	if err != nil {
-		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -106,9 +103,6 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, desiredTxResponseData)
 		return
 	default:
-		logger.GetLogger().
-			WithFields(logrus.Fields{"network": network, "hash": hash}).
-			Debug("Unexpected API response code: ", txResponse.StatusCode)
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
 		return
 	}

@@ -87,25 +87,21 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxRespon
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
 	bytes, code, err := c.performRequest(url)
 	if err != nil { // e.g. remote API is temporarily down
+		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
 		return TxResponse{}, err
 	}
 
-	switch code {
-	case http.StatusOK:
+	if code == http.StatusOK {
 		var txResponse TxResponse
 		if err := json.Unmarshal(bytes, &txResponse); err != nil {
 			return TxResponse{}, err
 		}
 		txResponse.StatusCode = code
 		return txResponse, nil
-
-	case http.StatusNotFound:
-
-	default:
-
 	}
 
-	// some other 5xx code ?
+	// log any other response
+	logger.GetLogger().WithFields(logrus.Fields{"url": url}).Debug("Unexpected API response.")
 	return TxResponse{StatusCode: code}, nil
 }
 

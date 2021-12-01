@@ -28,7 +28,7 @@ func NewApiController(cache *cache.Cache) *ApiController {
 
 const (
 	ErrUnsupportedNetwork = "Unsupported network."
-	ErrNotFound           = "Not found."
+	ErrNotFound           = "Not found." // todo: remove
 	ErrSomethingWentWrong = "Something went wrong in calling external API, try again"
 )
 
@@ -51,14 +51,13 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 
 	blockResponse, err := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
 	if err != nil {
-		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	switch blockResponse.StatusCode {
 	case http.StatusNotFound:
-		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
+		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: blockResponse.Data.Blockid})
 		return
 	case http.StatusOK:
 		desiredBlockResponseData := c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data)
@@ -67,9 +66,6 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, desiredBlockResponseData)
 		return
 	default:
-		logger.GetLogger().
-			WithFields(logrus.Fields{"network": network, "blockHashOrNumber": blockHashOrNumber}).
-			Debug("Unexpected API response code: ", blockResponse.StatusCode)
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
 		return
 	}

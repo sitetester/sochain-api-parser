@@ -52,13 +52,8 @@ func TestHandleBlockGetRouteWithInvalidNetwork(t *testing.T) {
 }
 
 func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
-	assertions := assert.New(t)
-
 	w := launchRequest(t, "/block/BTC/abcd")
 	checkStatusCode(t, 404, w.Code)
-
-	errorResponse := parseErrorResponse(w)
-	assertions.Equal(controller.ErrNotFound, errorResponse.Error)
 }
 
 // https://sochain.com/api/v2/get_block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf
@@ -113,9 +108,4 @@ func TestHandleTransactionGetRouteWithInvalidValidNetwork(t *testing.T) {
 
 	errorResponse := parseErrorResponse(w)
 	assertions.Equal(controller.ErrUnsupportedNetwork, errorResponse.Error)
-}
-
-func TestHandleTransactionGetRouteWithInvalidValidHash(t *testing.T) {
-	w := launchRequest(t, "/tx/BTC/xyz")
-	checkStatusCode(t, 500, w.Code)
 }

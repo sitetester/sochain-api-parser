@@ -3,6 +3,8 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"github.com/sitetester/sochain-api-parser/logger"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -59,10 +61,11 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (B
 	url := fmt.Sprintf("%s/get_block/%s/%s", c.ApiUrl, network, blockNumberOrHash)
 	bytes, code, err := c.performRequest(url)
 	if err != nil { // e.g. remote API is temporarily down
+		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
 		return BlockResponse{}, err
 	}
 
-	if code == http.StatusOK {
+	if code == http.StatusOK || code == http.StatusNotFound {
 		var blockResponse BlockResponse
 		if err := json.Unmarshal(bytes, &blockResponse); err != nil {
 			return BlockResponse{}, err
@@ -71,7 +74,11 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (B
 		return blockResponse, nil
 	}
 
-	// some other 5xx code ?
+	// any other interesting response ? log it anyway
+	logger.GetLogger().
+		WithFields(logrus.Fields{"url": url, "statusCode": code, "body": string(bytes)}).
+		Debug("Unexpected API response: ")
+
 	return BlockResponse{StatusCode: code}, nil
 }
 
@@ -83,13 +90,19 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxRespon
 		return TxResponse{}, err
 	}
 
-	if code == http.StatusOK {
+	switch code {
+	case http.StatusOK:
 		var txResponse TxResponse
 		if err := json.Unmarshal(bytes, &txResponse); err != nil {
 			return TxResponse{}, err
 		}
 		txResponse.StatusCode = code
 		return txResponse, nil
+
+	case http.StatusNotFound:
+
+	default:
+
 	}
 
 	// some other 5xx code ?
@@ -100,12 +113,12 @@ func (c *SoChainApiClient) performRequest(url string) ([]byte, int, error) {
 	client := &http.Client{Timeout: c.timeout}
 	resp, err := client.Get(url)
 	if err != nil { // e.g. remote API is temporarily down
-		return []byte(""), 0, err
+		return []byte(""), resp.StatusCode, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte(""), 0, err
+		return []byte(""), resp.StatusCode, err
 	}
 
 	return body, resp.StatusCode, nil

@@ -14,14 +14,17 @@ import (
 )
 
 func setupRouter(value string) *gin.Engine {
-	gin.SetMode(value) // switch to test mode (to avoid debug output)
+	gin.SetMode(value)
 	engine := gin.Default()
 
 	if value == gin.ReleaseMode {
 		// disable Console Color, you don't need console color when writing the logs to file.
 		gin.DisableConsoleColor()
-		f, _ := os.Create("logs/gin.log")
-		gin.DefaultWriter = io.MultiWriter(f)
+		f, err := os.Create("logs/gin.log")
+		if err != nil {
+			panic(err)
+		}
+		gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 		engine.Use(gin.Recovery())
 	}
 
@@ -49,14 +52,14 @@ func goDotEnvVariable(key string) string {
 func main() {
 	var engine *gin.Engine
 
+	var ginMode = gin.DebugMode
 	envGinMode := goDotEnvVariable("EnvGinMode")
 	if envGinMode != "" {
-		engine = setupRouter(envGinMode)
-	} else {
-		engine = setupRouter(gin.DebugMode)
+		ginMode = envGinMode
 	}
+	engine = setupRouter(ginMode)
 
-	addr := "8081"
+	addr := "8085"
 	err := engine.Run(fmt.Sprintf(":%s", addr))
 	if err != nil {
 		panic(err)

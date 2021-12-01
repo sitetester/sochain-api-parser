@@ -40,7 +40,7 @@ type TxResponse struct {
 type TxResponseData struct {
 	Network   string `json:"network"`
 	Time      int64
-	Txid      string `json:"txid"` /**/
+	Txid      string `json:"txid"`
 	Fee       string `json:"fee"`
 	SentValue string `json:"sent_value"`
 }

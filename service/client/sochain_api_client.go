@@ -77,7 +77,7 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (B
 	// any other interesting response ? log it anyway
 	logger.GetLogger().
 		WithFields(logrus.Fields{"url": url, "statusCode": code, "body": string(bytes)}).
-		Debug("Unexpected API response: ")
+		Debug("Unexpected API response.")
 
 	return BlockResponse{StatusCode: code}, nil
 }

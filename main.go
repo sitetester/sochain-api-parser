@@ -30,7 +30,7 @@ func setupRouter(value string) *gin.Engine {
 
 	apiController := controller.NewApiController(cache)
 	engine.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
-	engine.GET("/block/:network/:blockHashOrNumber", apiController.HandleBlockGetRoute)
+	engine.GET("/block/:network/:blockNumberOrHash", apiController.HandleBlockGetRoute)
 	engine.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
 
 	return engine

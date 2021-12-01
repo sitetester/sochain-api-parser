@@ -6,7 +6,6 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/sitetester/sochain-api-parser/service"
 	"net/http"
-	"strconv"
 )
 
 type ErrorResponse struct {
@@ -34,7 +33,7 @@ const (
 // HandleBlockGetRoute https://github.com/patrickmn/go-cache#usage
 func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
-	blockHashOrNumber := ctx.Param("blockHashOrNumber")
+	blockNumberOrHash := ctx.Param("blockNumberOrHash")
 
 	if !c.apiService.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
@@ -42,13 +41,13 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	}
 
 	// try to retrieve from cache (if not expired)
-	cacheKey := fmt.Sprintf("%s_%s", network, blockHashOrNumber)
+	cacheKey := fmt.Sprintf("%s_%s", network, blockNumberOrHash)
 	if x, found := c.cache.Get(cacheKey); found {
 		ctx.IndentedJSON(http.StatusOK, x.(*service.DesiredBlockResponseData))
 		return
 	}
 
-	blockResponse, err := c.apiService.ApiClient.GetBlock(network, blockHashOrNumber)
+	blockResponse, err := c.apiService.ApiClient.GetBlock(network, blockNumberOrHash)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -65,7 +64,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, desiredBlockResponseData)
 		return
 	default:
-		ctx.JSON(blockResponse.StatusCode, c.statusCodeToMsg(blockResponse.StatusCode))
+		ctx.JSON(blockResponse.StatusCode, c.apiService.StatusCodeToMsg(blockResponse.StatusCode))
 		return
 	}
 }
@@ -106,15 +105,4 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
 		return
 	}
-}
-
-func (c ApiController) statusCodeToMsg(statusCode int) string {
-	var msg string
-	code := strconv.Itoa(statusCode)
-	if code[0:1] == "4" {
-		msg = "Bad Request."
-	} else {
-		msg = "Unexpected Response."
-	}
-	return msg
 }

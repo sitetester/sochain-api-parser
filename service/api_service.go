@@ -4,6 +4,7 @@ import (
 	"github.com/sitetester/sochain-api-parser/logger"
 	"github.com/sitetester/sochain-api-parser/service/client"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -136,4 +137,15 @@ func (s *ApiService) GetTransactionInDesiredFormat(txResponseData client.TxRespo
 		Fee:       txResponseData.Fee,
 		SentValue: txResponseData.SentValue,
 	}
+}
+
+func (s *ApiService) StatusCodeToMsg(statusCode int) string {
+	var msg string
+	code := strconv.Itoa(statusCode)
+	if code[0:1] == "4" {
+		msg = "Bad Request."
+	} else {
+		msg = "Unexpected Response."
+	}
+	return msg
 }

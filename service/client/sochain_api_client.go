@@ -83,6 +83,9 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (B
 }
 
 // GetTransaction https://sochain.com/api/#get-tx
+// For some reason, there is inconsistent http response code for invalid hash
+// e.g. https://chain.so/api/v2/get_tx/DOGE/abc123 (/get_tx) returns 404,
+// while https://sochain.com/api/v2/tx/DOGE/abc123 (/tx) returns 500
 func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxResponse, error) {
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
 	bytes, code, err := c.performRequest(url)

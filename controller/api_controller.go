@@ -26,8 +26,7 @@ func NewApiController(cache *cache.Cache) *ApiController {
 
 const (
 	ErrUnsupportedNetwork = "Unsupported network."
-	ErrNotFound           = "Not found." // todo: remove
-	ErrSomethingWentWrong = "Something went wrong in calling external API, try again"
+	ErrUnexpectedResponse = "Unexpected response."
 )
 
 // HandleBlockGetRoute https://github.com/patrickmn/go-cache#usage
@@ -92,9 +91,6 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	}
 
 	switch txResponse.StatusCode {
-	case http.StatusNotFound:
-		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
-		return
 	case http.StatusOK:
 		desiredTxResponseData := c.apiService.GetTransactionInDesiredFormat(txResponse.Data)
 		// put in cache
@@ -102,7 +98,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, desiredTxResponseData)
 		return
 	default:
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrSomethingWentWrong})
+		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrUnexpectedResponse})
 		return
 	}
 }

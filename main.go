@@ -57,11 +57,6 @@ func main() {
 	}
 
 	addr := "8081"
-	addrEnv := goDotEnvVariable("HTTP_PORT") // create `.env` file with example value (HTTP_PORT=8182)
-	if addrEnv != "" {
-		addr = addrEnv
-	}
-
 	err := engine.Run(fmt.Sprintf(":%s", addr))
 	if err != nil {
 		panic(err)

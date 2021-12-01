@@ -1,7 +1,4 @@
-`docker-compose up`  
-
-**Project setup**  
-To load server on different port, create `.env` file with example value (HTTP_PORT=8182)
+`docker-compose up`
 
 
 **How to run tests ?**  

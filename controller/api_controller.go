@@ -2,11 +2,22 @@ package controller
 
 import (
 	"fmt"
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/sitetester/sochain-api-parser/service"
 	"net/http"
 )
+
+type InputBlock struct {
+	Network      string `valid:"alphanum,required"`
+	NumberOrHash string `valid:"alphanum,required"`
+}
+
+type InputTransaction struct {
+	Network string `valid:"alphanum,required"`
+	Hash    string `valid:"alphanum,required,maxstringlength(64)"`
+}
 
 type ErrorResponse struct {
 	Error string
@@ -33,6 +44,12 @@ const (
 func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	blockNumberOrHash := ctx.Param("blockNumberOrHash")
+
+	_, err := govalidator.ValidateStruct(InputBlock{Network: network, NumberOrHash: blockNumberOrHash})
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+	}
 
 	if !c.apiService.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
@@ -71,6 +88,12 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	hash := ctx.Param("hash")
+
+	_, err := govalidator.ValidateStruct(InputTransaction{Network: network, Hash: hash})
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+	}
 
 	if !c.apiService.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})

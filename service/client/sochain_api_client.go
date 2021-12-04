@@ -108,6 +108,8 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxRespon
 	return TxResponse{StatusCode: code}, nil
 }
 
+// Currently only `Timeout` option is configured, to configure `Transport, take a look at
+// http://tleyden.github.io/blog/2016/11/21/tuning-the-go-http-client-library-for-load-testing/
 func (c *SoChainApiClient) performRequest(url string) ([]byte, int, error) {
 	client := &http.Client{Timeout: c.timeout}
 	resp, err := client.Get(url)

@@ -11,8 +11,21 @@ import (
 	"log"
 	"os"
 	"time"
+
+	_ "github.com/sitetester/sochain-api-parser/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// https: //github.com/swaggo/swag#general-api-info
+// @title Sochain API Explorer
+// @version 1.0
+// @description This is an example server using Sochain API at backend
+// @host localhost:8081
+// @BasePath /api/v1
+// @accept json
+// @produce json
 func setupRouter(value string) *gin.Engine {
 	gin.SetMode(value)
 	engine := gin.Default()
@@ -32,10 +45,15 @@ func setupRouter(value string) *gin.Engine {
 	cache := cache.New(60*time.Minute, 10*time.Minute)
 
 	apiController := controller.NewApiController(cache)
-	engine.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
-	engine.GET("/block/:network/:blockNumberOrHash", apiController.HandleBlockGetRoute)
-	engine.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
+	v1 := engine.Group("/api/v1")
+	{
+		v1.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
+		v1.GET("/block/:network/:blockNumberOrHash", apiController.HandleBlockGetRoute)
+		v1.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
+	}
 
+	// e.g. /swagger/index.html
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return engine
 }
 

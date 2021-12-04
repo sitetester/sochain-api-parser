@@ -1,0 +1,90 @@
+basePath: /api/v1
+consumes:
+- application/json
+definitions:
+  service.DesiredBlockResponseData:
+    properties:
+      block_no:
+        type: integer
+      network:
+        type: string
+      next_blockhash:
+        type: string
+      previous_blockhash:
+        type: string
+      size:
+        type: integer
+      time:
+        description: actual type is `int`, but we need to display this time in string
+          format in API response
+        type: string
+      txs:
+        items:
+          $ref: '#/definitions/service.DesiredTxResponseData'
+        type: array
+    type: object
+  service.DesiredTxResponseData:
+    properties:
+      fee:
+        type: string
+      sent_value:
+        type: string
+      time:
+        type: string
+      txid:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is an example server using Sochain API at backend
+  title: Sochain API Explorer
+  version: "1.0"
+paths:
+  /block/{network}/{blockNumberOrHash}:
+    get:
+      description: Show block by network & number/hash
+      parameters:
+      - description: Network
+        in: path
+        name: network
+        required: true
+        type: string
+      - description: block number or hash
+        in: path
+        name: blockNumberOrHash
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.DesiredBlockResponseData'
+      summary: Show block
+      tags:
+      - blocks
+  /tx/{network}/{hash}:
+    get:
+      description: Show transaction by network & hash
+      parameters:
+      - description: network
+        in: path
+        name: network
+        required: true
+        type: string
+      - description: transaction hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.DesiredTxResponseData'
+      summary: Show transaction
+      tags:
+      - transactions
+produces:
+- application/json
+swagger: "2.0"

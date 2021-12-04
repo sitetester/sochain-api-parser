@@ -40,7 +40,15 @@ const (
 	ErrUnexpectedResponse = "Unexpected response."
 )
 
-// HandleBlockGetRoute https://github.com/patrickmn/go-cache#usage
+// HandleBlockGetRoute
+// https: //github.com/swaggo/swag#general-api-info
+// @Summary      Show block
+// @Description  Show block by network & number/hash
+// @Tags         blocks
+// @Param        network path string true "Network"
+// @Param        blockNumberOrHash path string true "block number or hash"
+// @Router       /block/{network}/{blockNumberOrHash} [get]
+// @Success      200  {object}   service.DesiredBlockResponseData
 func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	blockNumberOrHash := ctx.Param("blockNumberOrHash")
@@ -85,6 +93,15 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 	}
 }
 
+// HandleTransactionGetRoute
+// https: //github.com/swaggo/swag#general-api-info
+// @Summary      Show transaction
+// @Description  Show transaction by network & hash
+// @Tags         transactions
+// @Param        network path string true "network"
+// @Param        hash path string true "transaction hash"
+// @Router       /tx/{network}/{hash} [get]
+// @Success      200  {object}   service.DesiredTxResponseData
 func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 	network := ctx.Param("network")
 	hash := ctx.Param("hash")

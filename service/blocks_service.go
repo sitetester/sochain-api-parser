@@ -67,6 +67,7 @@ func (s *BlocksService) GetBlock(network string, blockNumberOrHash string) (Desi
 	return DesiredBlockResponseData{StatusCode: blockResponse.StatusCode}, nil
 }
 
+// https://www.epochconverter.com
 func (s *BlocksService) getBlockInDesiredFormat(network string, blockResponseData client.BlockResponseData) DesiredBlockResponseData {
 	timeInt64 := blockResponseData.Time
 

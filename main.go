@@ -31,7 +31,7 @@ func setupRouter(value string) *gin.Engine {
 	engine := gin.Default()
 
 	if value == gin.ReleaseMode {
-		// disable Console Color, you don't need console color when writing the logs to file.
+		// disable Console Color, not needed when writing the logs to file.
 		gin.DisableConsoleColor()
 		f, err := os.Create("logs/gin.log")
 		if err != nil {

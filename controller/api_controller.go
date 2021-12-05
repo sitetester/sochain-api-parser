@@ -9,11 +9,13 @@ import (
 	"net/http"
 )
 
+// InputBlock validation constraints are taken from https://github.com/asaskevich/govalidator
 type InputBlock struct {
-	Network      string `valid:"alphanum,required"`
+	Network      string `valid:"alpha,required"`
 	NumberOrHash string `valid:"alphanum,required"`
 }
 
+// InputTransaction validation constraints are taken from https://github.com/asaskevich/govalidator
 type InputTransaction struct {
 	Network string `valid:"alphanum,required"`
 	Hash    string `valid:"alphanum,required,maxstringlength(64)"`

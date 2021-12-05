@@ -27,7 +27,7 @@ There is a single instance of logger being used throughout app & it will log to 
 `Timeout ` is configured, so if external APi doesn’t respond in time, we should be able to log the error.
 
 **Deployment:**  
-- Docker supports `Automated docker builds`. Other options is to use `Jenkins` 
+Docker supports `Automated docker builds`. Other options is to use `Jenkins` 
 
 **Security:**  
 - Currently, validation is applied on input values. In all other cases, all inputs should be filtered before performing any operation.

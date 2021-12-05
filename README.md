@@ -16,7 +16,7 @@ Currently, all tests can be run without actually launching the API on separate p
 Alternatively, we can set `gin` framework's `EnvGinMode` to `test` 
 
 **Caching:**  
-Currently caching is implemented through `https://github.com/patrickmn/go-cache`, so repeated requests are returning much faster (without actually generating full response). Other options are `redis / mecached / Varnish`
+Currently, caching is implemented through https://github.com/patrickmn/go-cache, so repeated requests are returning much faster (without actually generating full response). Other options are `redis / mecached / Varnish`
 
 **Logging:**  
 There is a single instance of logger being used throughout app & it will log to `logs/app.log`. Currently unexpected API responses are logged.

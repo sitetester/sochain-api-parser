@@ -33,8 +33,6 @@ func setupFileLogger() {
 }
 
 func main() {
-	var engine *gin.Engine
-
 	var ginMode = gin.DebugMode
 	envGinMode := goDotEnvVariable("EnvGinMode")
 	if envGinMode != "" {
@@ -46,7 +44,7 @@ func main() {
 		setupFileLogger()
 	}
 
-	engine = route.SetupRouter()
+	engine := route.SetupRouter()
 
 	addr := "8081"
 	err := engine.Run(fmt.Sprintf(":%s", addr))

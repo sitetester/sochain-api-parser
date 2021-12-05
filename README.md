@@ -30,8 +30,7 @@ There is a single instance of logger being used throughout app & it will log to 
 Docker supports `Automated docker builds`. Other options is to use `Jenkins` 
 
 **Security:**  
-- Currently, validation is applied on input values. In all other cases, all inputs should be filtered before performing any operation.
-- API should be protected against DDOS
+Currently, validation is applied on input values. In all other cases, inputs should be filtered before performing any operation. API should be protected against DDOS
 
 **Scalability:**
 - “API Rate limiting” should be applied to avoid unwanted load on backend

@@ -9,7 +9,7 @@
 - http://localhost:8081/tx/BTC/dbaf14e1c476e76ea05a8b71921a46d6b06f0a950f17c5f9f1a03b8fae467f10
 
 **Documentation:** 
-- Swagger docs could be viewed at http://localhost:8081/swagger/index.html
+- Swagger docs could be viewed at http://localhost:8081//api/v1/swagger/index.html
 
 **How to run tests ?**  
 Currently, all tests can be run without actually launching the API on separate port. It’ll autoconfigure `gin` to `test` mode and will handle routes. 

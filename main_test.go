@@ -47,7 +47,7 @@ func parseErrorResponse(r *httptest.ResponseRecorder) controller.ErrorResponse {
 func TestHandleBlockGetRouteWithInvalidNetwork(t *testing.T) {
 	assertions := assert.New(t)
 
-	w := launchRequest(t, "/block/BTC123/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf")
+	w := launchRequest(t, "/block/xyz/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf")
 	checkStatusCode(t, 400, w.Code)
 
 	errorResponse := parseErrorResponse(w)
@@ -106,7 +106,7 @@ func checkTransaction(t *testing.T, desiredTxResponseData service.DesiredTxRespo
 func TestHandleTransactionGetRouteWithInvalidValidNetwork(t *testing.T) {
 	assertions := assert.New(t)
 
-	w := launchRequest(t, "/tx/BTC123/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f")
+	w := launchRequest(t, "/tx/abc/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f")
 	checkStatusCode(t, 400, w.Code)
 
 	errorResponse := parseErrorResponse(w)

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
@@ -28,20 +27,23 @@ type ErrorResponse struct {
 }
 
 type ApiController struct {
-	service *service.ApiService
-	cache   *cache.Cache
+	apiService    service.ApiService
+	blocksService *service.BlocksService
+	txsService    *service.TxsService
 }
 
 func NewApiController(cache *cache.Cache) *ApiController {
+	txService := service.NewTxsService(cache)
 	return &ApiController{
-		service: service.NewApiService(10),
-		cache:   cache,
+		apiService:    service.ApiService{},
+		blocksService: service.NewBlocksService(10, cache, txService),
+		txsService:    txService,
 	}
 }
 
 const (
+	ErrNotFound           = "Not found."
 	ErrUnsupportedNetwork = "Unsupported network."
-	ErrUnexpectedResponse = "Unexpected response."
 )
 
 // HandleBlockGetRoute
@@ -63,37 +65,26 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	if !c.service.SupportsNetwork(network) {
+	if !c.apiService.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
 
-	// try to retrieve from cache (if not expired)
-	cacheKey := fmt.Sprintf("%s_%s", network, blockNumberOrHash)
-	if x, found := c.cache.Get(cacheKey); found {
-		ctx.IndentedJSON(http.StatusOK, x.(*service.DesiredBlockResponseData))
-		return
-	}
-
-	blockResponse, err := c.service.ApiClient.GetBlock(network, blockNumberOrHash)
+	desiredBlockResponseData, err := c.blocksService.GetBlock(network, blockNumberOrHash)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	switch blockResponse.StatusCode {
-	case http.StatusNotFound:
-		// show error returned from remote server
-		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: blockResponse.Data.Blockid})
-		return
+	switch desiredBlockResponseData.StatusCode {
 	case http.StatusOK:
-		desiredBlockResponseData := c.service.GetBlockInDesiredFormat(network, blockResponse.Data)
-		// put in cache
-		c.cache.Set(cacheKey, &desiredBlockResponseData, cache.DefaultExpiration)
 		ctx.JSON(http.StatusOK, desiredBlockResponseData)
 		return
+	case http.StatusNotFound:
+		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
+		return
 	default:
-		ctx.JSON(blockResponse.StatusCode, c.service.StatusCodeToMsg(blockResponse.StatusCode))
+		ctx.JSON(desiredBlockResponseData.StatusCode, ErrorResponse{Error: c.apiService.StatusCodeToMsg(desiredBlockResponseData.StatusCode)})
 		return
 	}
 }
@@ -117,33 +108,25 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	if !c.service.SupportsNetwork(network) {
+	if !c.apiService.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
 
-	// try to retrieve from cache (if not expired)
-	cacheKey := fmt.Sprintf("%s_%s", network, hash)
-	if x, found := c.cache.Get(cacheKey); found {
-		ctx.IndentedJSON(http.StatusOK, x.(*service.DesiredTxResponseData))
-		return
-	}
-
-	txResponse, err := c.service.ApiClient.GetTransaction(network, hash)
+	desiredTxResponseData, err := c.txsService.GetTransaction(network, hash)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	switch txResponse.StatusCode {
+	switch desiredTxResponseData.StatusCode {
 	case http.StatusOK:
-		desiredTxResponseData := c.service.GetTransactionInDesiredFormat(txResponse.Data)
-		// put in cache
-		c.cache.Set(cacheKey, &desiredTxResponseData, cache.DefaultExpiration)
 		ctx.JSON(http.StatusOK, desiredTxResponseData)
 		return
-	default:
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{Error: ErrUnexpectedResponse})
+	case http.StatusNotFound:
+		ctx.JSON(http.StatusNotFound, ErrorResponse{Error: ErrNotFound})
 		return
+	default:
+		ctx.JSON(desiredTxResponseData.StatusCode, ErrorResponse{Error: c.apiService.StatusCodeToMsg(desiredTxResponseData.StatusCode)})
 	}
 }

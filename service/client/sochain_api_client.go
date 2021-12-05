@@ -10,12 +10,16 @@ import (
 	"time"
 )
 
-type RemoteApiStatus string
+const ApiResponseSuccess = "success"
 
 type BlockResponse struct {
 	StatusCode int               `json:"-"`
-	Status     RemoteApiStatus   `json:"status"`
+	Status     string            `json:"status"`
 	Data       BlockResponseData `json:"data"`
+}
+
+func (r BlockResponse) IsSuccess() bool {
+	return r.Status == ApiResponseSuccess
 }
 
 type BlockResponseData struct {
@@ -31,10 +35,14 @@ type BlockResponseData struct {
 }
 
 type TxResponse struct {
-	StatusCode      int             `json:"-"`
-	Status          RemoteApiStatus `json:"status"`
-	Data            TxResponseData  `json:"data"`
-	CustomSortOrder int             `json:"-"` // this will be used for sorting transactions
+	StatusCode      int            `json:"-"`
+	Status          string         `json:"status"`
+	Data            TxResponseData `json:"data"`
+	CustomSortOrder int            `json:"-"` // this will be used for sorting transactions
+}
+
+func (r TxResponse) IsSuccess() bool {
+	return r.Status == ApiResponseSuccess
 }
 
 type TxResponseData struct {
@@ -65,12 +73,11 @@ func (c *SoChainApiClient) GetBlock(network string, blockNumberOrHash string) (B
 		return BlockResponse{}, err
 	}
 
-	if code == http.StatusOK || code == http.StatusNotFound {
+	if code == http.StatusOK {
 		var blockResponse BlockResponse
 		if err := json.Unmarshal(bytes, &blockResponse); err != nil {
-			return BlockResponse{}, err
+			return blockResponse, err
 		}
-		blockResponse.StatusCode = code
 		return blockResponse, nil
 	}
 
@@ -97,9 +104,8 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxRespon
 	if code == http.StatusOK {
 		var txResponse TxResponse
 		if err := json.Unmarshal(bytes, &txResponse); err != nil {
-			return TxResponse{}, err
+			return txResponse, err
 		}
-		txResponse.StatusCode = code
 		return txResponse, nil
 	}
 

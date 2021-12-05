@@ -28,14 +28,14 @@ type ErrorResponse struct {
 }
 
 type ApiController struct {
-	apiService *service.ApiService
-	cache      *cache.Cache
+	service *service.ApiService
+	cache   *cache.Cache
 }
 
 func NewApiController(cache *cache.Cache) *ApiController {
 	return &ApiController{
-		apiService: service.NewApiService(10),
-		cache:      cache,
+		service: service.NewApiService(10),
+		cache:   cache,
 	}
 }
 
@@ -63,7 +63,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	if !c.apiService.SupportsNetwork(network) {
+	if !c.service.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
@@ -75,7 +75,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	blockResponse, err := c.apiService.ApiClient.GetBlock(network, blockNumberOrHash)
+	blockResponse, err := c.service.ApiClient.GetBlock(network, blockNumberOrHash)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -86,13 +86,13 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: blockResponse.Data.Blockid})
 		return
 	case http.StatusOK:
-		desiredBlockResponseData := c.apiService.GetBlockInDesiredFormat(network, blockResponse.Data)
+		desiredBlockResponseData := c.service.GetBlockInDesiredFormat(network, blockResponse.Data)
 		// put in cache
 		c.cache.Set(cacheKey, &desiredBlockResponseData, cache.DefaultExpiration)
 		ctx.JSON(http.StatusOK, desiredBlockResponseData)
 		return
 	default:
-		ctx.JSON(blockResponse.StatusCode, c.apiService.StatusCodeToMsg(blockResponse.StatusCode))
+		ctx.JSON(blockResponse.StatusCode, c.service.StatusCodeToMsg(blockResponse.StatusCode))
 		return
 	}
 }
@@ -116,7 +116,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	if !c.apiService.SupportsNetwork(network) {
+	if !c.service.SupportsNetwork(network) {
 		ctx.IndentedJSON(http.StatusBadRequest, ErrorResponse{Error: ErrUnsupportedNetwork})
 		return
 	}
@@ -128,7 +128,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 		return
 	}
 
-	txResponse, err := c.apiService.ApiClient.GetTransaction(network, hash)
+	txResponse, err := c.service.ApiClient.GetTransaction(network, hash)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -136,7 +136,7 @@ func (c *ApiController) HandleTransactionGetRoute(ctx *gin.Context) {
 
 	switch txResponse.StatusCode {
 	case http.StatusOK:
-		desiredTxResponseData := c.apiService.GetTransactionInDesiredFormat(txResponse.Data)
+		desiredTxResponseData := c.service.GetTransactionInDesiredFormat(txResponse.Data)
 		// put in cache
 		c.cache.Set(cacheKey, &desiredTxResponseData, cache.DefaultExpiration)
 		ctx.JSON(http.StatusOK, desiredTxResponseData)

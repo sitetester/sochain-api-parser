@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/sitetester/sochain-api-parser/controller"
+	"github.com/sitetester/sochain-api-parser/route"
 	"github.com/sitetester/sochain-api-parser/service"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -18,13 +19,15 @@ func checkStatusCode(t *testing.T, expected int, actual int) {
 }
 
 func launchRequest(t *testing.T, url string) *httptest.ResponseRecorder {
-	r := setupRouter(gin.TestMode) // switch to test mode (to avoid debug output)
+	gin.SetMode(gin.TestMode)
+
+	r := route.SetupRouter() // switch to test mode (to avoid debug output)
 
 	// create a response recorder so you can inspect the response
 	w := httptest.NewRecorder()
 
 	// mock request
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, route.ApiVersion+url, nil)
 	if err != nil {
 		t.Fatalf("Couldn't create request: %v\n", err)
 	}

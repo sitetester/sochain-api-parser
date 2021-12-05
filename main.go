@@ -4,61 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/patrickmn/go-cache"
-	"github.com/sitetester/sochain-api-parser/controller"
+	"github.com/sitetester/sochain-api-parser/route"
+
 	"github.com/sitetester/sochain-api-parser/logger"
 	"io"
 	"log"
 	"os"
-	"time"
-
-	_ "github.com/sitetester/sochain-api-parser/docs"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
-
-// These annotations are taken from https://github.com/swaggo/swag#general-api-info
-// @title Sochain API Explorer
-// @version 1.0
-// @description This is an example server using Sochain API at backend
-// @host localhost:8081
-// @BasePath /api/v1
-// @accept json
-// @produce json
-func setupRouter(value string) *gin.Engine {
-	gin.SetMode(value)
-	engine := gin.Default()
-
-	// https://github.com/gin-gonic/gin#how-to-write-log-file
-	if value == gin.ReleaseMode {
-		// not needed when writing the logs to file.
-		gin.DisableConsoleColor()
-		f, err := os.Create("logs/gin.log")
-		if err != nil {
-			panic(err)
-		}
-		gin.DefaultWriter = io.MultiWriter(f)
-
-		// Recovery middleware recovers from any panics and writes a 500 if there was one.
-		engine.Use(gin.Recovery())
-	}
-
-	// https://github.com/patrickmn/go-cache
-	cache := cache.New(60*time.Minute, 10*time.Minute)
-
-	apiController := controller.NewApiController(cache)
-	v1 := engine.Group("/api/v1")
-	{
-		v1.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
-		v1.GET("/block/:network/:blockNumberOrHash", apiController.HandleBlockGetRoute)
-		v1.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
-	}
-
-	// e.g. /swagger/index.html
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	return engine
-}
 
 // return the value of the key
 func goDotEnvVariable(key string) string {
@@ -70,6 +22,17 @@ func goDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
+// https://github.com/gin-gonic/gin#how-to-write-log-file
+func setupFileLogger() {
+	// not needed when writing the logs to file.
+	gin.DisableConsoleColor()
+	f, err := os.Create("logs/gin.log")
+	if err != nil {
+		panic(err)
+	}
+	gin.DefaultWriter = io.MultiWriter(f)
+}
+
 func main() {
 	var engine *gin.Engine
 
@@ -78,7 +41,13 @@ func main() {
 	if envGinMode != "" {
 		ginMode = envGinMode
 	}
-	engine = setupRouter(ginMode)
+	gin.SetMode(ginMode)
+
+	if ginMode == gin.ReleaseMode {
+		setupFileLogger()
+	}
+
+	engine = route.SetupRouter()
 
 	addr := "8081"
 	err := engine.Run(fmt.Sprintf(":%s", addr))

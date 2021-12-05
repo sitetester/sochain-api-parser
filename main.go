@@ -24,7 +24,7 @@ func goDotEnvVariable(key string) string {
 
 // https://github.com/gin-gonic/gin#how-to-write-log-file
 func setupFileLogger() {
-	// not needed when writing the logs to file.
+	// not needed when writing the logs to file
 	gin.DisableConsoleColor()
 	f, err := os.Create("logs/gin.log")
 	if err != nil {

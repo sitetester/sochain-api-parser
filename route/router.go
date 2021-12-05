@@ -4,12 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/sitetester/sochain-api-parser/controller"
+	_ "github.com/sitetester/sochain-api-parser/docs" // this is needed for swagger
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"time"
-
-	_ "github.com/sitetester/sochain-api-parser/docs"
-
-	swaggerFiles "github.com/swaggo/files"
 )
 
 const ApiVersion = "/api/v1"
@@ -29,9 +27,9 @@ func SetupRouter() *gin.Engine {
 	engine.Use(gin.Recovery())
 
 	// https://github.com/patrickmn/go-cache
-	cache := cache.New(60*time.Minute, 10*time.Minute)
+	appCache := cache.New(60*time.Minute, 10*time.Minute)
 
-	apiController := controller.NewApiController(cache)
+	apiController := controller.NewApiController(appCache)
 	v1 := engine.Group(ApiVersion)
 	{
 		v1.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })

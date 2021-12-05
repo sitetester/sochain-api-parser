@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/route"
-
 	"io"
 	"log"
 	"os"

@@ -44,7 +44,7 @@ func parseErrorResponse(r *httptest.ResponseRecorder) controller.ErrorResponse {
 	return er
 }
 
-func TestHandleBlockGetRouteWithInvalidNetwork(t *testing.T) {
+func TestHandleBlockGetRouteWithUnsupportedNetwork(t *testing.T) {
 	assertions := assert.New(t)
 
 	w := launchRequest(t, "/block/xyz/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf")
@@ -60,7 +60,7 @@ func TestHandleBlockGetRouteWithInvalidBlocNum(t *testing.T) {
 }
 
 // https://sochain.com/api/v2/get_block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf
-func TestHandleBlockGetRouteWithValidNetworkAndBlocNum(t *testing.T) {
+func TestHandleBlockGetRouteWithSupportedNetworkAndBlocNum(t *testing.T) {
 	assertions := assert.New(t)
 
 	w := launchRequest(t, "/block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf")
@@ -101,8 +101,7 @@ func checkTransaction(t *testing.T, desiredTxResponseData service.DesiredTxRespo
 	assertions.Equal(sentValue, desiredTxResponseData.SentValue)
 }
 
-// https://sochain.com/api/v2/tx/BTC/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f
-func TestHandleTransactionGetRouteWithInvalidValidNetwork(t *testing.T) {
+func TestHandleTransactionGetRouteWithUnsupportedNetwork(t *testing.T) {
 	assertions := assert.New(t)
 
 	w := launchRequest(t, "/tx/abc/ee475443f1fbfff84ffba43ba092a70d291df233bd1428f3d09f7bd1a6054a1f")

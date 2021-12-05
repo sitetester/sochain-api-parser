@@ -17,7 +17,7 @@ type InputBlock struct {
 
 // InputTransaction validation constraints are taken from https://github.com/asaskevich/govalidator
 type InputTransaction struct {
-	Network string `valid:"alphanum,required"`
+	Network string `valid:"alpha,required"`
 	Hash    string `valid:"alphanum,required,maxstringlength(64)"`
 }
 

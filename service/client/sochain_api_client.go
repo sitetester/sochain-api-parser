@@ -90,7 +90,7 @@ func (c *SoChainApiClient) GetTransaction(network string, hash string) (TxRespon
 	url := fmt.Sprintf("%s/tx/%s/%s", c.ApiUrl, network, hash)
 	bytes, code, err := c.performRequest(url)
 	if err != nil { // e.g. remote API is temporarily down
-		logger.GetLogger().Errorf("Erro while performing API call: %s", err.Error())
+		logger.GetLogger().Errorf("Error while performing API call: %s", err.Error())
 		return TxResponse{}, err
 	}
 

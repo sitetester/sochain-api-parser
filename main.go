@@ -6,7 +6,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/route"
 
-	"github.com/sitetester/sochain-api-parser/logger"
 	"io"
 	"log"
 	"os"
@@ -54,6 +53,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	logger.GetLogger().Debug("GetLogger() called ONCE") // just to check `singleton` functionality ;)
 }

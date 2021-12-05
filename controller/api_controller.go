@@ -10,15 +10,17 @@ import (
 )
 
 // InputBlock validation constraints are taken from https://github.com/asaskevich/govalidator
+// https://sochain.com/api/#get-block
 type InputBlock struct {
 	Network      string `valid:"alpha,required"`
 	NumberOrHash string `valid:"alphanum,required"`
 }
 
 // InputTransaction validation constraints are taken from https://github.com/asaskevich/govalidator
+// https://sochain.com/api/#get-tx
 type InputTransaction struct {
 	Network string `valid:"alpha,required"`
-	Hash    string `valid:"alphanum,required,maxstringlength(64)"`
+	Hash    string `valid:"alphanum,required"`
 }
 
 type ErrorResponse struct {

@@ -30,6 +30,7 @@ func setupRouter(value string) *gin.Engine {
 	gin.SetMode(value)
 	engine := gin.Default()
 
+	// https://github.com/gin-gonic/gin#how-to-write-log-file
 	if value == gin.ReleaseMode {
 		// not needed when writing the logs to file.
 		gin.DisableConsoleColor()
@@ -37,7 +38,9 @@ func setupRouter(value string) *gin.Engine {
 		if err != nil {
 			panic(err)
 		}
-		gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+		gin.DefaultWriter = io.MultiWriter(f)
+
+		// Recovery middleware recovers from any panics and writes a 500 if there was one.
 		engine.Use(gin.Recovery())
 	}
 

@@ -83,6 +83,7 @@ func (c *ApiController) HandleBlockGetRoute(ctx *gin.Context) {
 
 	switch blockResponse.StatusCode {
 	case http.StatusNotFound:
+		// show error returned from remote server
 		ctx.IndentedJSON(http.StatusNotFound, ErrorResponse{Error: blockResponse.Data.Blockid})
 		return
 	case http.StatusOK:

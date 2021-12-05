@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 	"github.com/sitetester/sochain-api-parser/controller"
-	_ "github.com/sitetester/sochain-api-parser/docs" // this is needed for swagger
+	_ "github.com/sitetester/sochain-api-parser/docs" // this is needed for swagger (https://github.com/swaggo/swag#getting-started)
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"time"

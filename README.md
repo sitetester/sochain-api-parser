@@ -9,7 +9,8 @@
 - http://localhost:8081/api/v1/tx/BTC/dbaf14e1c476e76ea05a8b71921a46d6b06f0a950f17c5f9f1a03b8fae467f10
 
 **Documentation:**  
-Swagger docs could be viewed at http://localhost:8081/api/v1/swagger/index.html
+- `Docs` folder is auto generated through [swag init](https://github.com/swaggo/swag)
+- Swagger docs could be viewed at http://localhost:8081/api/v1/swagger/index.html
 
 **How to run tests ?**  
 `go test `  

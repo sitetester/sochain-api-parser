@@ -8,8 +8,8 @@
 - http://localhost:8081/api/v1/block/BTC/000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf
 - http://localhost:8081/api/v1/tx/BTC/dbaf14e1c476e76ea05a8b71921a46d6b06f0a950f17c5f9f1a03b8fae467f10
 
-**Documentation:** 
-- Swagger docs could be viewed at http://localhost:8081/api/v1/swagger/index.html
+**Documentation:**  
+Swagger docs could be viewed at http://localhost:8081/api/v1/swagger/index.html
 
 **How to run tests ?**  
 `go test `  

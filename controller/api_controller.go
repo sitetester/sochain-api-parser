@@ -16,7 +16,7 @@ type InputBlock struct {
 	NumberOrHash string `valid:"alphanum,required"`
 }
 
-// InputTransaction validation constraints are taken from https://github.com/asaskevich/govalidator
+// InputTransaction
 // https://sochain.com/api/#get-tx
 type InputTransaction struct {
 	Network string `valid:"alpha,required"`

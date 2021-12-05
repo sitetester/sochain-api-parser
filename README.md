@@ -20,8 +20,8 @@ Alternatively, we can set `gin` framework's `EnvGinMode` to `test`
 Currently, caching is implemented through https://github.com/patrickmn/go-cache, so repeated requests are returning much faster (without actually generating full response). Other options are `redis / mecached / Varnish`
 
 **Logging:**  
-There is a single instance of logger being used throughout app & it will log to `logs/app.log`. Currently unexpected API responses are logged.
-logrotate sholud be considered for large file. On production environment, we should use a more proper solution e.g. Sentry
+There is a single instance of logger being used throughout app & it will log to `logs/app.log`. Currently, unexpected API responses are logged.
+`logrotate` should be considered for large file. On production environment, we should use a more proper solution e.g. Sentry
 
 **Http Client:**  
 `Timeout ` is configured, so if external APi doesn’t respond in time, we should be able to log the error and not wait for it forever.

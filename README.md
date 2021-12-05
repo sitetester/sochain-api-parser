@@ -12,7 +12,8 @@
 - Swagger docs could be viewed at http://localhost:8081/api/v1/swagger/index.html
 
 **How to run tests ?**  
-Currently, all tests can be run without actually launching the API on separate port. It’ll autoconfigure `gin` to `test` mode and will handle routes. 
+`go test `  
+All tests can be run without actually launching the API on separate port. It’ll autoconfigure `gin` to `test` mode and will handle routes. 
 Alternatively, we can set `gin` framework's `EnvGinMode` to `test` 
 
 **Caching:**  

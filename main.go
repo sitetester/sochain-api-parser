@@ -10,7 +10,6 @@ import (
 	"os"
 )
 
-// return the value of the key
 func goDotEnvVariable(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {

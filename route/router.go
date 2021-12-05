@@ -28,8 +28,8 @@ func SetupRouter() *gin.Engine {
 
 	// https://github.com/patrickmn/go-cache
 	appCache := cache.New(60*time.Minute, 10*time.Minute)
-
 	apiController := controller.NewApiController(appCache)
+
 	v1 := engine.Group(ApiVersion)
 	{
 		v1.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })

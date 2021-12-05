@@ -37,9 +37,10 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/", func(ctx *gin.Context) { ctx.String(200, "It works!") })
 		v1.GET("/block/:network/:blockNumberOrHash", apiController.HandleBlockGetRoute)
 		v1.GET("/tx/:network/:hash", apiController.HandleTransactionGetRoute)
+
+		// e.g. /swagger/index.html
+		engine.GET(ApiVersion+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	// e.g. /swagger/index.html
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return engine
 }

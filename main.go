@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sitetester/sochain-api-parser/route"
@@ -33,21 +32,19 @@ func setupFileLogger() {
 }
 
 func main() {
-	var ginMode = gin.DebugMode
 	envGinMode := goDotEnvVariable("EnvGinMode")
 	if envGinMode != "" {
-		ginMode = envGinMode
+		gin.SetMode(envGinMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
 	}
-	gin.SetMode(ginMode)
 
-	if ginMode == gin.ReleaseMode {
+	if gin.Mode() == gin.ReleaseMode {
 		setupFileLogger()
 	}
 
 	engine := route.SetupRouter()
-
-	addr := "8081"
-	err := engine.Run(fmt.Sprintf(":%s", addr))
+	err := engine.Run(":8081")
 	if err != nil {
 		panic(err)
 	}

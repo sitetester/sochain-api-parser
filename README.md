@@ -24,7 +24,7 @@ There is a single instance of logger being used throughout app & it will log to 
 `logrotate` should be considered for large file. On production environment, we should use a more proper solution e.g. Sentry
 
 **Http Client:**  
-`Timeout ` is configured, so if external APi doesn’t respond in time, we should be able to log the error and not wait for it forever.
+`Timeout ` is configured, so if external APi doesn’t respond in time, we should be able to log the error.
 
 **Deployment:**  
 - Docker supports `Automated docker builds`. Other options is to use `Jenkins` 

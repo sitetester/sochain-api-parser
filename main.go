@@ -18,7 +18,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// https: //github.com/swaggo/swag#general-api-info
+// These annotations are taken from https://github.com/swaggo/swag#general-api-info
 // @title Sochain API Explorer
 // @version 1.0
 // @description This is an example server using Sochain API at backend
